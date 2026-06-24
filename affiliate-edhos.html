@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AffiliSync Mobile V3.4</title>
+  <title>AffiliSync Mobile V3.5</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -46,9 +46,9 @@
       </div>
       <div>
         <h1 class="text-sm font-black tracking-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-          AffiliSync V3.4 Pro
+          AffiliSync V3.5 Pro
         </h1>
-        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">DOM Protected & Stabilized</p>
+        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider font-mono">Auto Video & Deep Linker</p>
       </div>
     </div>
     <div class="bg-emerald-500/10 text-emerald-400 text-[10px] px-3 py-1 rounded-full font-black border border-emerald-500/20" id="badge-target">
@@ -74,17 +74,14 @@
     <!-- TAB 1: CARI KOMISI & PRODUK -->
     <section id="tab-komisi" class="tab-content active space-y-4">
       
-      <!-- TIPS DAPAT LINK -->
+      <!-- CAROUSEL / TIPS LINK -->
       <div class="bg-gradient-to-br from-indigo-500/15 to-purple-500/5 border border-indigo-500/20 p-4 rounded-2xl space-y-2">
         <h2 class="text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
-          <i data-lucide="help-circle" class="w-3.5 h-3.5"></i> Cara Dapat Link Komisi
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Update Versi 3.5 Pro
         </h2>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Link dari hasil pencarian AI adalah link produk toko biasa. Agar dapat komisi, Anda wajib mengubahnya di aplikasi Shopee/TikTok Anda terlebih dahulu!
+          Sekarang Anda bisa **generate video promosi beranimasi** langsung dari HP Anda, serta langsung membuka pencarian produk di aplikasi Shopee/TikTok secara instan!
         </p>
-        <button onclick="switchTab('panduan')" class="text-xs text-indigo-300 underline font-bold flex items-center gap-1 pt-1">
-          Buka Panduan Dapatkan Link <i data-lucide="arrow-right" class="w-3 h-3"></i>
-        </button>
       </div>
 
       <!-- GOAL TARGET SLIDER -->
@@ -139,7 +136,9 @@
           <p id="error-diagnosis-text" class="text-[10px] text-slate-300 leading-relaxed"></p>
         </div>
 
+        <!-- ========================================== -->
         <!-- AI SEARCH RESULT CONTAINER -->
+        <!-- ========================================== -->
         <div id="ai-result-box" class="hidden mt-3 bg-slate-950 border border-emerald-500/20 p-4 rounded-xl space-y-4 animate-fade-in">
           <div>
             <span id="ai-badge-rate" class="bg-emerald-950 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded border border-emerald-500/30">
@@ -159,30 +158,44 @@
             </div>
           </div>
 
-          <!-- VIRAL REASONS LIST (PENGAMAN HARUS ADA DI SINI) -->
           <div class="text-[10px] text-slate-400 leading-normal space-y-1">
             <p class="font-bold text-slate-300">Mengapa Sangat Laris?</p>
-            <ul id="ai-viral-reasons" class="list-disc list-inside space-y-0.5">
-              <!-- Diisi oleh JS -->
-            </ul>
+            <ul id="ai-viral-reasons" class="list-disc list-inside space-y-0.5"></ul>
           </div>
 
-          <!-- REKOMENDASI TOKO UNTUK DI-AMBIL LINK-NYA -->
+          <!-- LAUNCH DEEP LINK TERBARU -->
           <div class="p-3 bg-indigo-950/45 border border-indigo-500/20 rounded-xl space-y-2">
             <p class="text-[11px] font-extrabold text-indigo-400 flex items-center gap-1">
-              <i data-lucide="link-2" class="w-3.5 h-3.5"></i> Link Produk Toko Asli (Untuk Di-affiliatekan):
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> Buka Aplikasi Marketplace & Cari:
             </p>
             <p class="text-[10px] text-slate-400">
-              Klik tombol di bawah untuk menyalin link produk toko biasa, lalu ubah di aplikasi Shopee/TikTok Anda menjadi link komisi:
+              Ketuk tombol di bawah untuk membuka aplikasi Shopee/TikTok langsung di HP Anda untuk mengambil link komisi Anda:
             </p>
             <div class="flex gap-2">
-              <button onclick="copyRawProductLink('shopee')" class="flex-1 bg-orange-600 hover:bg-orange-700 text-slate-950 font-black text-[11px] py-1.5 rounded-lg">
-                Salin Link Shopee
+              <button onclick="openMarketplaceApp('shopee')" class="flex-1 bg-orange-600 hover:bg-orange-700 text-slate-950 font-black text-[11px] py-2 rounded-lg flex items-center justify-center gap-1">
+                <i data-lucide="external-link" class="w-3 h-3"></i> Buka Shopee
               </button>
-              <button onclick="copyRawProductLink('tiktok')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-[11px] py-1.5 rounded-lg border border-slate-700">
-                Salin Link TikTok
+              <button onclick="openMarketplaceApp('tiktok')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-[11px] py-2 rounded-lg border border-slate-700 flex items-center justify-center gap-1">
+                <i data-lucide="external-link" class="w-3 h-3"></i> Buka TikTok
               </button>
             </div>
+          </div>
+
+          <!-- DYNAMIC VIDEO GENERATOR PREVIEW -->
+          <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2 text-center">
+            <p class="text-[11px] font-extrabold text-emerald-400 flex items-center justify-center gap-1">
+              <i data-lucide="video" class="w-3.5 h-3.5"></i> Video Maker Promosi Instan:
+            </p>
+            <div class="relative w-44 h-72 mx-auto bg-black rounded-lg overflow-hidden border border-slate-700">
+              <canvas id="video-canvas" width="360" height="640" class="w-full h-full object-cover"></canvas>
+              <div id="video-rendering-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center hidden">
+                <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400 mb-2"></span>
+                <span class="text-[10px] text-slate-300 font-bold" id="render-progress">Merender Video...</span>
+              </div>
+            </div>
+            <button onclick="generateAndDownloadVideo()" id="btn-video-gen" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] py-2 rounded-lg flex items-center justify-center gap-1">
+              <i data-lucide="download" class="w-3 h-3"></i> Generate & Unduh Video Promosi
+            </button>
           </div>
 
           <div class="space-y-2">
@@ -190,7 +203,7 @@
             <input 
               type="text" 
               id="user-custom-link" 
-              placeholder="Tempel link komisi hasil konversi Anda di sini (https://shope.ee/...)" 
+              placeholder="Tempel link komisi Shopee Anda (https://shope.ee/...)" 
               class="w-full text-xs bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -278,16 +291,6 @@
             />
           </div>
 
-          <div>
-            <label class="block text-slate-400 mb-1">Link URL Video Promosi (MP4)</label>
-            <input
-              type="text"
-              id="m-video"
-              placeholder="https://..."
-              class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 font-mono focus:outline-none"
-            />
-          </div>
-
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-slate-400 mb-1">Kategori</label>
@@ -340,7 +343,7 @@
         
         <div class="space-y-3">
           <div class="space-y-1">
-            <label class="text-xs text-slate-400 font-semibold uppercase">Google Gemini API Key (AQ. atau AIza)</label>
+            <label class="text-xs text-slate-400 font-semibold uppercase">Google Gemini API Key</label>
             <input
               type="password"
               id="api-key-input"
@@ -407,19 +410,6 @@
         description: "TWS Wireless dengan fitur Active Noise Cancelling (ANC). Sangat diminati anak muda karena bass ngebass parah dan harga di bawah 100 ribu.",
         shopeeLink: "https://shopee.co.id/search?keyword=tws%20f9%20pro%20anc",
         tiktokLink: "https://www.tiktok.com/search?q=tws%20f9%20pro"
-      },
-      {
-        id: "hc-2",
-        title: "Panci Elektrik Serbaguna 1.8L",
-        category: "Peralatan Rumah",
-        price: 125000,
-        sales: "30rb+ Terjual",
-        commissionRate: "12%",
-        commissionValue: 15000,
-        videoUrl: "https://videos.pexels.com/video-files/4919747/4919747-uhd_1440_2732_25fps.mp4",
-        description: "Alat masak wajib anak kos dan ibu rumah tangga modern. Bisa untuk menggoreng, mengukus, dan merebus tanpa kompor gas.",
-        shopeeLink: "https://shopee.co.id/search?keyword=panci%20elektrik%20serbaguna",
-        tiktokLink: "https://www.tiktok.com/search?q=panci%20elektrik%20serbaguna"
       }
     ];
 
@@ -427,16 +417,11 @@
     let geminiApiKey = localStorage.getItem('affili_api_key') || '';
     let calcTarget = 50;
     let searchResultsData = null;
+    let animationFrameId = null;
 
-    // FUNGSI PENGAMAN: Mencegah error null pointer pada DOM
     function safeSetText(id, text) {
       const el = document.getElementById(id);
       if (el) el.innerText = text;
-    }
-
-    function safeSetHTML(id, html) {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = html;
     }
 
     window.onload = function() {
@@ -531,28 +516,26 @@
       safeSetText('target-count', `${calcTarget} Kali Transaksi`);
     }
 
-    function triggerClipboard(text) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      let success = false;
-      try {
-        success = document.execCommand('copy');
-      } catch (err) {
-        success = false;
-      }
-      document.body.removeChild(textArea);
-      return success;
-    }
-
-    function copyRawProductLink(platform) {
+    // FUNGSI UTAMA LAUNCH MARKETPLACE SECARA DEEP-LINK
+    function openMarketplaceApp(platform) {
       if (!searchResultsData) return;
-      const link = platform === 'shopee' ? searchResultsData.shopeeSearchLink : searchResultsData.tiktokSearchLink;
-      triggerClipboard(link);
-      showToast('Link produk toko asli disalin!', 'success');
+      const term = encodeURIComponent(searchResultsData.productName);
+
+      if (platform === 'shopee') {
+        // Shopee Deep Link untuk langsung membuka hasil pencarian produk tersebut
+        window.location.href = `shopeeid://search?keyword=${term}`;
+        // Fallback jika aplikasi tidak terinstal
+        setTimeout(() => {
+          window.open(`https://shopee.co.id/search?keyword=${term}`, '_blank');
+        }, 1500);
+      } else {
+        // TikTok Deep Link menuju halaman pencarian produk
+        window.location.href = `snssdk1180://search?keyword=${term}`;
+        setTimeout(() => {
+          window.open(`https://www.tiktok.com/search?q=${term}`, '_blank');
+        }, 1500);
+      }
+      showToast(`Membuka aplikasi ${platform}...`, 'success');
     }
 
     async function searchHighCommissionWithAI() {
@@ -609,19 +592,21 @@
         });
 
         if (!response.ok) {
-          throw new Error(`Error Server Google (Status: ${response.status}). Pastikan API Key di-copy lengkap tanpa terpotong.`);
+          throw new Error(`Error Server Google (Status: ${response.status}). Pastikan API Key di-copy lengkap.`);
         }
 
         const data = await response.json();
         let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
         
-        // Membersihkan markdown wrapper JSON dari AI
         rawText = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
         searchResultsData = JSON.parse(rawText);
         
         updateAISearchResultUI();
         if (resultBox) resultBox.classList.remove('hidden');
         showToast('Riset Produk Viral Selesai!', 'success');
+        
+        // Start live video preview drawing
+        startCanvasAnimation();
 
       } catch (error) {
         const errText = document.getElementById('error-diagnosis-text');
@@ -659,6 +644,186 @@
       }
     }
 
+    // ==========================================
+    // SISTEM AUTO VIDEO MAKER CLIENT-SIDE (CANVAS ANIMATOR)
+    // ==========================================
+    let canvasTime = 0;
+    function startCanvasAnimation() {
+      const canvas = document.getElementById('video-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      function drawFrame() {
+        if (!searchResultsData) return;
+        canvasTime += 0.03; // FPS Simulation
+        const duration = 10; // 10 Detik durasi video
+        const currentTime = canvasTime % duration;
+
+        // Clear Canvas & Draw Gradient Background
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        const col1 = Math.sin(canvasTime * 0.5) * 40 + 20; // Animated gradient hues
+        grad.addColorStop(0, `hsl(${col1}, 80%, 25%)`);
+        grad.addColorStop(1, '#020617');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Aesthetic Glow Circle
+        ctx.beginPath();
+        ctx.arc(canvas.width/2, canvas.height/2, 100 + Math.sin(canvasTime * 3) * 15, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+        ctx.fill();
+
+        // RENDER TAHAP 1: HOOK 3 DETIK PERTAMA
+        if (currentTime < 3) {
+          ctx.fillStyle = '#f59e0b';
+          ctx.font = 'bold 16px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText("⚠️ AWAS MENYESAL! ⚠️", canvas.width / 2, 200);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '900 20px Arial';
+          
+          // Warp Text
+          const hookText = searchResultsData.captionHook || "Rugi Banget Kalau Belum Punya Ini!";
+          wrapText(ctx, hookText.toUpperCase(), canvas.width / 2, 260, 240, 30);
+        }
+        // RENDER TAHAP 2: KELEBIHAN PRODUK & DETAIL (Detik 3 s.d 7)
+        else if (currentTime >= 3 && currentTime < 7) {
+          ctx.fillStyle = '#10b981';
+          ctx.font = 'bold 13px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText("✨ REKOMENDASI TERLARIS ✨", canvas.width / 2, 140);
+
+          // Product Name
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '900 18px Arial';
+          wrapText(ctx, searchResultsData.productName, canvas.width / 2, 200, 260, 26);
+
+          // Price Tag Box
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(canvas.width/2 - 90, 340, 180, 44);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#10b981';
+          ctx.strokeRect(canvas.width/2 - 90, 340, 180, 44);
+
+          ctx.fillStyle = '#34d399';
+          ctx.font = 'bold 16px Arial';
+          ctx.fillText(`CUMA ${searchResultsData.estimatedPrice}`, canvas.width / 2, 368);
+        }
+        // RENDER TAHAP 3: CALL TO ACTION (Detik 7 s.d 10)
+        else {
+          ctx.fillStyle = '#34d399';
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText("🔥 JANGAN KEHABISAN! 🔥", canvas.width / 2, 200);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px Arial';
+          ctx.fillText("Checkout Sekarang Juga Lewat", canvas.width / 2, 250);
+
+          // Yellow Badge CTA
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillRect(canvas.width/2 - 120, 290, 240, 44);
+          
+          ctx.fillStyle = '#020617';
+          ctx.font = '900 13px Arial';
+          ctx.fillText("👉 LINK DI BIO / KERANJANG KUNING 👈", canvas.width / 2, 316);
+        }
+
+        // Draw Watermark / Brand Logo at bottom
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.font = 'bold 10px Courier New';
+        ctx.fillText("CREATED VIA AFFILISYNC PRO", canvas.width / 2, canvas.height - 40);
+
+        animationFrameId = requestAnimationFrame(drawFrame);
+      }
+
+      drawFrame();
+    }
+
+    // Wrap text helper for canvas
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      for(let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        let testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        }
+        else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    // MEDIA RECORDER EXPORTER (Ekspor Canvas Ke File Video HP)
+    function generateAndDownloadVideo() {
+      const canvas = document.getElementById('video-canvas');
+      const overlay = document.getElementById('video-rendering-overlay');
+      const progressText = document.getElementById('render-progress');
+      if (!canvas) return;
+
+      // Show rendering overlay
+      if (overlay) overlay.classList.remove('hidden');
+
+      // Setup Canvas Capture Stream
+      const stream = canvas.captureStream(30); // 30 FPS
+      const recordedChunks = [];
+      
+      // Menggunakan mimeType yang paling kompatibel di mobile (WebM / MP4)
+      let options = { mimeType: 'video/webm; codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
+
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = function() {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        
+        // Buat tautan unduh instan
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `promosi_${searchResultsData ? searchResultsData.productName.replace(/\s+/g, '_') : 'video'}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          if (overlay) overlay.classList.add('hidden');
+          showToast('Video promosi berhasil disimpan ke file unduhan!', 'success');
+        }, 500);
+      };
+
+      // Jalankan Perekaman Berdurasi Tepat 10 Detik
+      canvasTime = 0; // Reset timeline agar rekam dari awal
+      mediaRecorder.start();
+      
+      let secElapsed = 0;
+      const interval = setInterval(() => {
+        secElapsed += 1;
+        if (progressText) progressText.innerText = `Memproses Video: ${secElapsed * 10}%`;
+        if (secElapsed >= 10) {
+          clearInterval(interval);
+          mediaRecorder.stop();
+        }
+      }, 1000);
+    }
+
     function importAISearchResult() {
       if (!searchResultsData) return;
       const data = searchResultsData;
@@ -672,7 +837,7 @@
       const newCamp = {
         id: "camp-" + Date.now(),
         productName: data.productName,
-        videoFile: "https://videos.pexels.com/video-files/4252325/4252325-uhd_1440_2732_25fps.mp4",
+        videoFile: "Video Promosi Tergenerate",
         shopeeAffLink: shopeeLinkUsed,
         caption: defaultCaption,
         category: "Riset AI",
@@ -769,7 +934,6 @@
     function handleManualSubmit(e) {
       e.preventDefault();
       const nameEl = document.getElementById('m-name');
-      const videoEl = document.getElementById('m-video');
       const catEl = document.getElementById('m-category');
       const shopeeEl = document.getElementById('m-shopee');
       const captionEl = document.getElementById('m-caption');
@@ -777,7 +941,6 @@
       if (!nameEl) return;
 
       const name = nameEl.value;
-      const video = videoEl ? videoEl.value : '';
       const category = catEl ? catEl.value : 'Umum';
       const shopee = shopeeEl ? shopeeEl.value : '#';
       const caption = captionEl && captionEl.value ? captionEl.value : `Produk Baru: ${name}. Dapatkan sekarang lewat tautan belanja resmi kami!`;
@@ -785,7 +948,7 @@
       const newCamp = {
         id: "camp-" + Date.now(),
         productName: name,
-        videoFile: video || "https://videos.pexels.com",
+        videoFile: "Video Promosi Tergenerate",
         shopeeAffLink: shopee,
         caption: caption,
         category: category,
