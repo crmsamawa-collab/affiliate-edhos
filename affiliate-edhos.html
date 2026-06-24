@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AffiliSync Mobile V3.3</title>
+  <title>AffiliSync Mobile V3.4</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -46,9 +46,9 @@
       </div>
       <div>
         <h1 class="text-sm font-black tracking-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-          AffiliSync V3.3 Pro
+          AffiliSync V3.4 Pro
         </h1>
-        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Affiliate Link Generator Ready</p>
+        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">DOM Protected & Stabilized</p>
       </div>
     </div>
     <div class="bg-emerald-500/10 text-emerald-400 text-[10px] px-3 py-1 rounded-full font-black border border-emerald-500/20" id="badge-target">
@@ -74,7 +74,7 @@
     <!-- TAB 1: CARI KOMISI & PRODUK -->
     <section id="tab-komisi" class="tab-content active space-y-4">
       
-      <!-- HERO CAROUSEL / TIPS LINK -->
+      <!-- TIPS DAPAT LINK -->
       <div class="bg-gradient-to-br from-indigo-500/15 to-purple-500/5 border border-indigo-500/20 p-4 rounded-2xl space-y-2">
         <h2 class="text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
           <i data-lucide="help-circle" class="w-3.5 h-3.5"></i> Cara Dapat Link Komisi
@@ -140,7 +140,7 @@
         </div>
 
         <!-- AI SEARCH RESULT CONTAINER -->
-        <div id="ai-result-box" class="hidden mt-3 bg-slate-950 border border-emerald-500/20 p-4 rounded-xl space-y-4">
+        <div id="ai-result-box" class="hidden mt-3 bg-slate-950 border border-emerald-500/20 p-4 rounded-xl space-y-4 animate-fade-in">
           <div>
             <span id="ai-badge-rate" class="bg-emerald-950 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded border border-emerald-500/30">
               KOMISI 15%
@@ -157,6 +157,14 @@
               <span class="text-[9px] text-slate-400 block" id="ai-target-label">Potensi 50 Sales</span>
               <span id="ai-comm-total" class="text-xs font-extrabold text-yellow-400">Rp 0</span>
             </div>
+          </div>
+
+          <!-- VIRAL REASONS LIST (PENGAMAN HARUS ADA DI SINI) -->
+          <div class="text-[10px] text-slate-400 leading-normal space-y-1">
+            <p class="font-bold text-slate-300">Mengapa Sangat Laris?</p>
+            <ul id="ai-viral-reasons" class="list-disc list-inside space-y-0.5">
+              <!-- Diisi oleh JS -->
+            </ul>
           </div>
 
           <!-- REKOMENDASI TOKO UNTUK DI-AMBIL LINK-NYA -->
@@ -211,7 +219,7 @@
       <div id="antrean-container" class="space-y-3"></div>
     </section>
 
-    <!-- TAB 3: PANDUAN LANGKAH-LANGKAH RESMI (NEW TAB) -->
+    <!-- TAB 3: PANDUAN LANGKAH-LANGKAH RESMI -->
     <section id="tab-panduan" class="tab-content space-y-4">
       <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
         <h2 class="text-sm font-black text-white flex items-center gap-1.5 border-b border-slate-800 pb-3">
@@ -227,7 +235,7 @@
           <p class="text-xs text-slate-300 leading-relaxed">
             1. Salin <strong>Link Produk Toko Asli</strong> yang Anda dapatkan dari hasil deteksi AI aplikasi ini.<br/>
             2. Buka aplikasi <strong>Shopee</strong> di HP Anda.<br/>
-            3. Pergi ke halaman <strong>Saya</strong> di pojok kanan bawah, lalu pilih menu <strong>Shopee Affiliates Program</strong>.<br/>
+            3. Pergi ke halaman <strong>Saya</strong> di pojok kanan bawah, lalu pilih menu <strong>Saya</strong> -> <strong>Shopee Affiliates Program</strong>.<br/>
             4. Pilih tab <strong>Link</strong> di bagian bawah, lalu tempelkan link produk toko asli tadi ke dalam kolom konversi.<br/>
             5. Klik <strong>Ambil Link</strong>. Maka Shopee akan menghasilkan link baru berawalan <code class="text-orange-400">https://shope.ee/...</code>.<br/>
             6. Link itulah yang Anda masukkan ke kolom <strong>"Link Affiliate Anda"</strong> di aplikasi ini!
@@ -328,7 +336,7 @@
     <!-- TAB 5: PENGATURAN API KEY -->
     <section id="tab-akun" class="tab-content">
       <div class="bg-slate-900 border border-slate-850 p-4 rounded-xl space-y-4">
-        <h3 class="text-sm font-bold text-slate-200">⚙/ Pengaturan API Key</h3>
+        <h3 class="text-sm font-bold text-slate-200">⚙️ Pengaturan API Key</h3>
         
         <div class="space-y-3">
           <div class="space-y-1">
@@ -353,7 +361,7 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- BOTTOM MOBILE NAVIGATION BAR -->
+  <!-- BOTTOM NAVIGATION -->
   <!-- ========================================== -->
   <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2.5 px-3 flex justify-between items-center z-40">
     <button onclick="switchTab('komisi')" id="btn-nav-komisi" class="flex flex-col items-center space-y-1 text-emerald-400 font-bold flex-1">
@@ -420,24 +428,40 @@
     let calcTarget = 50;
     let searchResultsData = null;
 
+    // FUNGSI PENGAMAN: Mencegah error null pointer pada DOM
+    function safeSetText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = text;
+    }
+
+    function safeSetHTML(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+
     window.onload = function() {
       lucide.createIcons();
-      document.getElementById('api-key-input').value = geminiApiKey;
+      const apiKeyInput = document.getElementById('api-key-input');
+      if (apiKeyInput) apiKeyInput.value = geminiApiKey;
       checkApiStatus();
       renderCuratedProducts();
       renderCampaigns();
       updateTargetBadge();
 
-      document.getElementById('target-slider').addEventListener('input', function(e) {
-        calcTarget = parseInt(e.target.value);
-        updateTargetBadge();
-        renderCuratedProducts();
-        if (searchResultsData) updateAISearchResultUI();
-      });
+      const slider = document.getElementById('target-slider');
+      if (slider) {
+        slider.addEventListener('input', function(e) {
+          calcTarget = parseInt(e.target.value);
+          updateTargetBadge();
+          renderCuratedProducts();
+          if (searchResultsData) updateAISearchResultUI();
+        });
+      }
     };
 
     function checkApiStatus() {
       const el = document.getElementById('status-api-indicator');
+      if (!el) return;
       if (geminiApiKey) {
         el.className = "text-[9px] text-emerald-400 font-bold flex items-center gap-1";
         el.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> API Siap';
@@ -449,12 +473,15 @@
 
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.getElementById('tab-' + tabName).classList.add('active');
+      const targetTab = document.getElementById('tab-' + tabName);
+      if (targetTab) targetTab.classList.add('active');
 
       const navButtons = ['komisi', 'antrean', 'panduan', 'tambah', 'akun'];
       navButtons.forEach(btn => {
         const el = document.getElementById('btn-nav-' + btn);
-        el.className = btn === tabName ? "flex flex-col items-center space-y-1 text-emerald-400 font-bold flex-1" : "flex flex-col items-center space-y-1 text-slate-500 flex-1";
+        if (el) {
+          el.className = btn === tabName ? "flex flex-col items-center space-y-1 text-emerald-400 font-bold flex-1" : "flex flex-col items-center space-y-1 text-slate-500 flex-1";
+        }
       });
     }
 
@@ -464,16 +491,18 @@
       const toastIcon = document.getElementById('toast-icon');
       const toastText = document.getElementById('toast-text');
 
+      if (!toast || !toastBg || !toastText) return;
+
       toastText.innerText = message;
       if (type === 'success') {
         toastBg.className = "p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-emerald-950/95 border-emerald-500 text-emerald-200";
-        toastIcon.innerText = "🤑";
+        if (toastIcon) toastIcon.innerText = "🤑";
       } else if (type === 'error') {
         toastBg.className = "p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-rose-950/95 border-rose-500 text-rose-200";
-        toastIcon.innerText = "⚠️";
+        if (toastIcon) toastIcon.innerText = "⚠️";
       } else {
         toastBg.className = "p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-slate-900 border-slate-800 text-slate-200";
-        toastIcon.innerText = "ℹ️";
+        if (toastIcon) toastIcon.innerText = "ℹ️";
       }
 
       toast.classList.remove('translate-y-[-150%]');
@@ -486,17 +515,20 @@
     }
 
     function saveApiKey() {
-      const key = document.getElementById('api-key-input').value.trim();
+      const input = document.getElementById('api-key-input');
+      if (!input) return;
+      const key = input.value.trim();
       localStorage.setItem('affili_api_key', key);
       geminiApiKey = key;
       checkApiStatus();
       showToast('Kunci API disimpan!', 'success');
-      document.getElementById('error-diagnosis').classList.add('hidden');
+      const diagnosis = document.getElementById('error-diagnosis');
+      if (diagnosis) diagnosis.classList.add('hidden');
     }
 
     function updateTargetBadge() {
-      document.getElementById('badge-target').innerText = `Target: ${calcTarget} Pcs`;
-      document.getElementById('target-count').innerText = `${calcTarget} Kali Transaksi`;
+      safeSetText('badge-target', `Target: ${calcTarget} Pcs`);
+      safeSetText('target-count', `${calcTarget} Kali Transaksi`);
     }
 
     function triggerClipboard(text) {
@@ -524,7 +556,9 @@
     }
 
     async function searchHighCommissionWithAI() {
-      const query = document.getElementById('search-input').value.trim();
+      const input = document.getElementById('search-input');
+      if (!input) return;
+      const query = input.value.trim();
       if (!query) {
         showToast('Tulis kategori produk terlebih dahulu!', 'error');
         return;
@@ -537,10 +571,14 @@
       const searchBtn = document.getElementById('search-btn');
       const diagnosisBox = document.getElementById('error-diagnosis');
       
-      searchBtn.disabled = true;
-      searchBtn.innerText = "Menganalisis...";
-      diagnosisBox.classList.add('hidden');
-      document.getElementById('ai-result-box').classList.add('hidden');
+      if (searchBtn) {
+        searchBtn.disabled = true;
+        searchBtn.innerText = "Menganalisis...";
+      }
+      if (diagnosisBox) diagnosisBox.classList.add('hidden');
+      
+      const resultBox = document.getElementById('ai-result-box');
+      if (resultBox) resultBox.classList.add('hidden');
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
       
@@ -577,50 +615,59 @@
         const data = await response.json();
         let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
         
-        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        // Membersihkan markdown wrapper JSON dari AI
+        rawText = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
         searchResultsData = JSON.parse(rawText);
         
         updateAISearchResultUI();
-        document.getElementById('ai-result-box').classList.remove('hidden');
+        if (resultBox) resultBox.classList.remove('hidden');
         showToast('Riset Produk Viral Selesai!', 'success');
 
       } catch (error) {
-        document.getElementById('error-diagnosis-text').innerText = error.message;
-        diagnosisBox.classList.remove('hidden');
+        const errText = document.getElementById('error-diagnosis-text');
+        if (errText) errText.innerText = error.message;
+        if (diagnosisBox) diagnosisBox.classList.remove('hidden');
         showToast('Gagal memproses data AI.', 'error');
       } finally {
-        searchBtn.disabled = false;
-        searchBtn.innerText = "Deteksi";
+        if (searchBtn) {
+          searchBtn.disabled = false;
+          searchBtn.innerText = "Deteksi";
+        }
       }
     }
 
     function updateAISearchResultUI() {
+      if (!searchResultsData) return;
       const data = searchResultsData;
-      document.getElementById('ai-badge-rate').innerText = `KOMISI ${data.commissionRate || '15%'}`;
-      document.getElementById('ai-product-name').innerText = data.productName;
-      document.getElementById('ai-comm-val').innerText = data.commissionValue;
-      document.getElementById('ai-target-label').innerText = `Potensi ${calcTarget} Sales`;
+      
+      safeSetText('ai-badge-rate', `KOMISI ${data.commissionRate || '15%'}`);
+      safeSetText('ai-product-name', data.productName || 'Nama Produk');
+      safeSetText('ai-comm-val', data.commissionValue || 'Rp 0');
+      safeSetText('ai-target-label', `Potensi ${calcTarget} Sales`);
 
-      const singleVal = parseInt(data.commissionValue.replace(/[^0-9]/g, '')) || 0;
-      document.getElementById('ai-comm-total').innerText = "Rp " + (singleVal * calcTarget).toLocaleString('id-ID');
+      const singleVal = parseInt(String(data.commissionValue).replace(/[^0-9]/g, '')) || 0;
+      safeSetText('ai-comm-total', "Rp " + (singleVal * calcTarget).toLocaleString('id-ID'));
 
       const reasonsContainer = document.getElementById('ai-viral-reasons');
-      reasonsContainer.innerHTML = '';
-      (data.viralReasons || []).forEach(r => {
-        const li = document.createElement('li');
-        li.innerText = r;
-        reasonsContainer.appendChild(li);
-      });
+      if (reasonsContainer) {
+        reasonsContainer.innerHTML = '';
+        (data.viralReasons || []).forEach(r => {
+          const li = document.createElement('li');
+          li.innerText = r;
+          reasonsContainer.appendChild(li);
+        });
+      }
     }
 
     function importAISearchResult() {
       if (!searchResultsData) return;
       const data = searchResultsData;
-      const customUserLink = document.getElementById('user-custom-link').value.trim();
+      const customLinkEl = document.getElementById('user-custom-link');
+      const customUserLink = customLinkEl ? customLinkEl.value.trim() : '';
 
       const shopeeLinkUsed = customUserLink ? customUserLink : data.shopeeSearchLink;
 
-      const defaultCaption = `🚨 JANGAN SAMPAI NYESEL GAK BELI INI! 🚨\n\n${data.captionHook} ✨\n\nProduk: ${data.productName}\nSudah laku lebih dari ${data.marketSales}!\n\nHarga promo diskon cuma ${data.estimatedPrice}!\n\n👉 Klik link di bawah ini untuk langsung order sekarang juga sebelum promo berakhir!\n📍 Link Pembelian: ${shopeeLinkUsed}\n\n#affiliatemarketing #racunshopee #tiktokshop #komisitinggi`;
+      const defaultCaption = `🚨 JANGAN SAMPAI NYESEL GAK BELI INI! 🚨\n\n${data.captionHook || 'Wajib beli barang keren yang satu ini!'} ✨\n\nProduk: ${data.productName}\nSudah laku lebih dari ${data.marketSales || '1.000+'}\n\nHarga promo diskon cuma ${data.estimatedPrice || 'Termurah'}!\n\n👉 Klik link di bawah ini untuk langsung order sekarang juga sebelum promo berakhir!\n📍 Link Pembelian: ${shopeeLinkUsed}\n\n#affiliatemarketing #racunshopee #tiktokshop #komisitinggi`;
 
       const newCamp = {
         id: "camp-" + Date.now(),
@@ -629,7 +676,7 @@
         shopeeAffLink: shopeeLinkUsed,
         caption: defaultCaption,
         category: "Riset AI",
-        commissionInfo: `${data.commissionRate} (${data.commissionValue}/item)`,
+        commissionInfo: `${data.commissionRate || '15%'} (${data.commissionValue}/item)`,
         status: "Antrean"
       };
 
@@ -637,13 +684,13 @@
       saveCampaignData();
       showToast('Kampanye Berhasil Disimpan!', 'success');
       
-      // Reset custom input
-      document.getElementById('user-custom-link').value = '';
+      if (customLinkEl) customLinkEl.value = '';
       switchTab('antrean');
     }
 
     function renderCuratedProducts() {
       const container = document.getElementById('curated-list');
+      if (!container) return;
       container.innerHTML = '';
 
       HIGH_COMMISSION_PRODUCTS.forEach(prod => {
@@ -695,7 +742,8 @@
       const prod = HIGH_COMMISSION_PRODUCTS.find(p => p.id === id);
       if (!prod) return;
 
-      const userCustomInput = document.getElementById(`custom-${id}`).value.trim();
+      const customInput = document.getElementById(`custom-${id}`);
+      const userCustomInput = customInput ? customInput.value.trim() : '';
       const finalLink = userCustomInput ? userCustomInput : prod.shopeeLink;
 
       const computedProfit = prod.commissionValue * calcTarget;
@@ -720,18 +768,26 @@
 
     function handleManualSubmit(e) {
       e.preventDefault();
-      const name = document.getElementById('m-name').value;
-      const video = document.getElementById('m-video').value;
-      const category = document.getElementById('m-category').value;
-      const shopee = document.getElementById('m-shopee').value;
-      let caption = document.getElementById('m-caption').value;
+      const nameEl = document.getElementById('m-name');
+      const videoEl = document.getElementById('m-video');
+      const catEl = document.getElementById('m-category');
+      const shopeeEl = document.getElementById('m-shopee');
+      const captionEl = document.getElementById('m-caption');
+
+      if (!nameEl) return;
+
+      const name = nameEl.value;
+      const video = videoEl ? videoEl.value : '';
+      const category = catEl ? catEl.value : 'Umum';
+      const shopee = shopeeEl ? shopeeEl.value : '#';
+      const caption = captionEl && captionEl.value ? captionEl.value : `Produk Baru: ${name}. Dapatkan sekarang lewat tautan belanja resmi kami!`;
 
       const newCamp = {
         id: "camp-" + Date.now(),
         productName: name,
         videoFile: video || "https://videos.pexels.com",
-        shopeeAffLink: shopee || "#",
-        caption: caption || `Produk Baru: ${name}. Dapatkan sekarang lewat tautan belanja resmi kami!`,
+        shopeeAffLink: shopee,
+        caption: caption,
         category: category,
         status: "Antrean"
       };
@@ -739,7 +795,9 @@
       campaigns.unshift(newCamp);
       saveCampaignData();
       showToast('Kampanye manual disimpan!', 'success');
-      document.getElementById('manual-form').reset();
+      
+      const form = document.getElementById('manual-form');
+      if (form) form.reset();
       switchTab('antrean');
     }
 
@@ -783,6 +841,7 @@
 
     function renderCampaigns() {
       const container = document.getElementById('antrean-container');
+      if (!container) return;
       container.innerHTML = '';
 
       if (campaigns.length === 0) {
