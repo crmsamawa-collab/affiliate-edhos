@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AffiliSync Mobile V3</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#1e293b',
+              950: '#020617',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Transisi halus saat perpindahan tab */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    /* Sembunyikan scrollbar di browser HP */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between max-w-md mx-auto border-x border-slate-900 shadow-2xl relative pb-20">
+
+  <!-- ========================================== -->
+  <!-- MOBILE HEADER -->
+  <!-- ========================================== -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 p-4 sticky top-0 z-40 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 via-rose-500 to-indigo-500 flex items-center justify-center text-white text-lg font-black shadow-lg">
+        $
+      </div>
+      <div>
+        <h1 class="text-sm font-black tracking-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+          AffiliSync V3 Pro
+        </h1>
+        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">High Commission Finder</p>
+      </div>
+    </div>
+    <div class="bg-emerald-500/10 text-emerald-400 text-[10px] px-3 py-1 rounded-full font-black border border-emerald-500/20" id="badge-target">
+      Target: 50 Pcs
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- TOAST NOTIFICATION (Pesan Melayang) -->
+  <!-- ========================================== -->
+  <div id="toast" class="fixed top-16 left-4 right-4 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-out max-w-sm mx-auto">
+    <div id="toast-bg" class="p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-slate-900 border-slate-800 text-slate-200">
+      <span id="toast-icon">ℹ️</span>
+      <span id="toast-text" class="font-bold">Notifikasi</span>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MAIN WINDOW CONTENT -->
+  <!-- ========================================== -->
+  <main class="p-4 flex-1 overflow-y-auto space-y-4">
+
+    <!-- TAB 1: CARI KOMISI (DEFAULT) -->
+    <section id="tab-komisi" class="tab-content active space-y-4">
+      <!-- GOAL TARGET SLIDER -->
+      <div class="bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border border-emerald-500/20 p-4 rounded-2xl space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xs font-black text-emerald-400 uppercase tracking-widest">💸 Target Penjualan Bulanan</h2>
+          <span class="text-[11px] font-bold text-slate-300" id="target-count">50 Kali Transaksi</span>
+        </div>
+        <input 
+          type="range" 
+          min="10" 
+          max="500" 
+          step="10"
+          value="50" 
+          id="target-slider"
+          class="w-full accent-emerald-500 bg-slate-950 h-1.5 rounded-lg appearance-none cursor-pointer"
+        />
+        <p class="text-[10px] text-slate-400 leading-normal">
+          Geser slider untuk memproyeksikan potensi bersih komisi affiliate langsung di tabel produk bawah!
+        </p>
+      </div>
+
+      <!-- AI HIGH COMMISSION DETECTOR -->
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-1.5">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>AI Detektor Komisi & Produk Terlaris</span>
+        </h3>
+        <p class="text-[10px] text-slate-400">
+          Ketik kategori produk apa saja untuk membiarkan AI menganalisis produk yang paling laris dengan komisi paling tebal.
+        </p>
+        
+        <div class="flex space-x-2">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Ketik kategori (misal: gamis, kosmetik, panci)"
+            class="flex-1 text-xs bg-slate-950 border border-slate-800 px-3.5 py-2.5 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
+          />
+          <button
+            onclick="searchHighCommissionWithAI()"
+            id="search-btn"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition duration-150 flex items-center space-x-1"
+          >
+            <span>Deteksi</span>
+          </button>
+        </div>
+
+        <!-- AI SEARCH RESULT CONTAINER -->
+        <div id="ai-result-box" class="hidden mt-3 bg-slate-950 border border-emerald-500/20 p-4 rounded-xl space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span id="ai-badge-rate" class="bg-emerald-950 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded border border-emerald-500/30">
+                KOMISI 15%
+              </span>
+              <p id="ai-product-name" class="text-sm font-black mt-1.5">Nama Produk</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 bg-slate-900 p-2.5 rounded-lg border border-slate-850 text-center">
+            <div>
+              <span class="text-[9px] text-slate-400 block">Laba Bersih/Item</span>
+              <span id="ai-comm-val" class="text-xs font-extrabold text-emerald-400">Rp 0</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 block" id="ai-target-label">Potensi 50 Sales</span>
+              <span id="ai-comm-total" class="text-xs font-extrabold text-yellow-400">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-slate-400 leading-normal space-y-1">
+            <p class="font-bold text-slate-300">Mengapa Sangat Laris?</p>
+            <ul id="ai-viral-reasons" class="list-disc list-inside space-y-0.5">
+              <!-- Diisi via JS -->
+            </ul>
+          </div>
+
+          <button
+            onclick="importAISearchResult()"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs py-2.5 rounded-xl"
+          >
+            Ambil Sebagai Kampanye Saya
+          </button>
+        </div>
+      </div>
+
+      <!-- STATIC DATABASE DARI PRODUK REKOMENDASI -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Produk Komisi Terbesar & Terlaris Hari Ini
+        </h3>
+        <div id="curated-list" class="space-y-4">
+          <!-- Diisi via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DAFTAR KAMPANYE SAYA -->
+    <section id="tab-antrean" class="tab-content space-y-4">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Daftar Kampanye Siap Post</h3>
+      <div id="antrean-container" class="space-y-3">
+        <!-- Kampanye yang diimpor akan muncul di sini -->
+      </div>
+    </section>
+
+    <!-- TAB 3: TAMBAH MANUAL -->
+    <section id="tab-tambah" class="tab-content">
+      <form id="manual-form" onsubmit="handleManualSubmit(event)" class="bg-slate-900 border border-slate-850 p-4 rounded-2xl space-y-4">
+        <h3 class="text-sm font-bold text-slate-200">Tambah Draf Kampanye Manual</h3>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Nama Produk</label>
+            <input
+              type="text"
+              id="m-name"
+              placeholder="Contoh: Lampu Tidur Proyektor Bintang"
+              class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Link URL Video Promosi (MP4)</label>
+            <input
+              type="text"
+              id="m-video"
+              placeholder="https://..."
+              class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 font-mono focus:outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-400 mb-1">Kategori</label>
+              <select
+                id="m-category"
+                class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-300"
+              >
+                <option value="Gaya Hidup">Gaya Hidup</option>
+                <option value="Elektronik">Elektronik</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Dapur">Dapur</option>
+                <option value="Umum">Umum</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Link Affiliate Shopee</label>
+              <input
+                type="text"
+                id="m-shopee"
+                placeholder="https://shope.ee/..."
+                class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Link Affiliate TikTok</label>
+            <input
+              type="text"
+              id="m-tiktok"
+              placeholder="https://vt.tiktok.com/..."
+              class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Caption Promosi</label>
+            <textarea
+              rows="4"
+              id="m-caption"
+              placeholder="Tulis sendiri caption promosi atau biarkan kosong jika ingin otomatis..."
+              class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 focus:outline-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs py-3.5 rounded-xl"
+        >
+          Simpan ke Antrean
+        </button>
+      </form>
+    </section>
+
+    <!-- TAB 4: PENGATURAN API KEY -->
+    <section id="tab-akun" class="tab-content">
+      <div class="bg-slate-900 border border-slate-850 p-4 rounded-xl space-y-4">
+        <h3 class="text-sm font-bold text-slate-200">⚙️ Pengaturan API Key</h3>
+        
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 font-semibold uppercase">Google Gemini API Key</label>
+            <input
+              type="password"
+              id="api-key-input"
+              placeholder="AIzaSy..."
+              class="w-full text-xs bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
+            />
+            <span class="text-[10px] text-slate-500 leading-relaxed block mt-1">
+              Kunci API disimpan secara lokal di browser HP Anda. Kunci ini dibutuhkan untuk menggunakan fitur **AI Riset Produk**.
+            </span>
+          </div>
+          <button 
+            onclick="saveApiKey()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded-xl w-full"
+          >
+            Simpan Kunci API
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- BOTTOM MOBILE NAVIGATION BAR -->
+  <!-- ========================================== -->
+  <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2.5 px-6 flex justify-between items-center z-40">
+    <button
+      onclick="switchTab('komisi')"
+      id="btn-nav-komisi"
+      class="flex flex-col items-center space-y-1 text-emerald-400 font-bold"
+    >
+      <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+      <span class="text-[10px]">Cari Komisi</span>
+    </button>
+
+    <button
+      onclick="switchTab('antrean')"
+      id="btn-nav-antrean"
+      class="flex flex-col items-center space-y-1 text-slate-500"
+    >
+      <i data-lucide="briefcase" class="w-5 h-5"></i>
+      <span class="text-[10px]">Kampanye</span>
+    </button>
+
+    <button
+      onclick="switchTab('tambah')"
+      id="btn-nav-tambah"
+      class="flex flex-col items-center space-y-1 text-slate-500"
+    >
+      <i data-lucide="plus-circle" class="w-5 h-5"></i>
+      <span class="text-[10px]">Tambah</span>
+    </button>
+
+    <button
+      onclick="switchTab('akun')"
+      id="btn-nav-akun"
+      class="flex flex-col items-center space-y-1 text-slate-500"
+    >
+      <i data-lucide="key" class="w-5 h-5"></i>
+      <span class="text-[10px]">Kunci AI</span>
+    </button>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT PROGRAM LOGIC -->
+  <!-- ========================================== -->
+  <script>
+    // Database Produk Terlaris Bawaan
+    const HIGH_COMMISSION_PRODUCTS = [
+      {
+        id: "hc-1",
+        title: "TWS Earphone ANC F9 Pro",
+        category: "Elektronik",
+        price: 89000,
+        sales: "50rb+ Terjual",
+        commissionRate: "15%",
+        commissionValue: 13350,
+        videoUrl: "https://videos.pexels.com/video-files/5091642/5091642-hd_1080_2048_25fps.mp4",
+        description: "TWS Wireless dengan fitur Active Noise Cancelling (ANC). Sangat diminati anak muda karena bass ngebass parah dan harga di bawah 100 ribu.",
+        shopeeLink: "https://shopee.co.id/search?keyword=tws%20f9%20pro%20anc",
+        tiktokLink: "https://www.tiktok.com/search?q=tws%20f9%20pro"
+      },
+      {
+        id: "hc-2",
+        title: "Panci Elektrik Serbaguna 1.8L",
+        category: "Peralatan Rumah",
+        price: 125000,
+        sales: "30rb+ Terjual",
+        commissionRate: "12%",
+        commissionValue: 15000,
+        videoUrl: "https://videos.pexels.com/video-files/4919747/4919747-uhd_1440_2732_25fps.mp4",
+        description: "Alat masak wajib anak kos dan ibu rumah tangga modern. Bisa untuk menggoreng, mengukus, dan merebus tanpa kompor gas.",
+        shopeeLink: "https://shopee.co.id/search?keyword=panci%20elektrik%20serbaguna",
+        tiktokLink: "https://www.tiktok.com/search?q=panci%20elektrik%20serbaguna"
+      },
+      {
+        id: "hc-3",
+        title: "Humidifier Diffuser Aromaterapi 500ml",
+        category: "Dekorasi Rumah",
+        price: 79000,
+        sales: "100rb+ Terjual",
+        commissionRate: "18%",
+        commissionValue: 14220,
+        videoUrl: "https://videos.pexels.com/video-files/4252325/4252325-uhd_1440_2732_25fps.mp4",
+        description: "Pelembab udara estetik dilengkapi lampu LED 7 warna. Sangat mudah dibuat konten video estetik (aesthetic room vibes).",
+        shopeeLink: "https://shopee.co.id/search?keyword=humidifier%20diffuser%20500ml",
+        tiktokLink: "https://www.tiktok.com/search?q=humidifier%20diffuser%20500ml"
+      }
+    ];
+
+    // Global State
+    let campaigns = JSON.parse(localStorage.getItem('affili_camp_data')) || [];
+    let geminiApiKey = localStorage.getItem('affili_api_key') || '';
+    let calcTarget = 50;
+    let searchResultsData = null;
+
+    // Inisialisasi Aplikasi saat dimuat
+    window.onload = function() {
+      lucide.createIcons();
+      document.getElementById('api-key-input').value = geminiApiKey;
+      renderCuratedProducts();
+      renderCampaigns();
+      updateTargetBadge();
+
+      // Listener Slider Target Komisi
+      document.getElementById('target-slider').addEventListener('input', function(e) {
+        calcTarget = parseInt(e.target.value);
+        updateTargetBadge();
+        renderCuratedProducts();
+        if (searchResultsData) {
+          updateAISearchResultUI();
+        }
+      });
+    };
+
+    // Fungsi Pengatur Tab Navigasi
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      // Ganti Warna Menu Navigasi Aktif
+      const navButtons = ['komisi', 'antrean', 'tambah', 'akun'];
+      navButtons.forEach(btn => {
+        const el = document.getElementById('btn-nav-' + btn);
+        if (btn === tabName) {
+          el.className = "flex flex-col items-center space-y-1 text-emerald-400 font-bold";
+        } else {
+          el.className = "flex flex-col items-center space-y-1 text-slate-500";
+        }
+      });
+    }
+
+    // Fungsi Menampilkan Notifikasi Kustom (Pengganti alert)
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastBg = document.getElementById('toast-bg');
+      const toastIcon = document.getElementById('toast-icon');
+      const toastText = document.getElementById('toast-text');
+
+      toastText.innerText = message;
+      
+      if (type === 'success') {
+        toastBg.className = "p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-emerald-950/95 border-emerald-500 text-emerald-200";
+        toastIcon.innerText = "🤑";
+      } else if (type === 'error') {
+        toastBg.className = "p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-rose-950/95 border-rose-500 text-rose-200";
+        toastIcon.innerText = "⚠️";
+      } else {
+        toastBg.className = "p-3.5 rounded-xl shadow-2xl border text-xs flex items-center space-x-2.5 bg-slate-900 border-slate-800 text-slate-200";
+        toastIcon.innerText = "ℹ️";
+      }
+
+      // Animasi Muncul
+      toast.classList.remove('translate-y-[-150%]');
+      toast.classList.add('translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0');
+        toast.classList.add('translate-y-[-150%]');
+      }, 3500);
+    }
+
+    // Ambil API Key
+    function saveApiKey() {
+      const key = document.getElementById('api-key-input').value.trim();
+      localStorage.setItem('affili_api_key', key);
+      geminiApiKey = key;
+      showToast('Kunci API berhasil disimpan!', 'success');
+    }
+
+    // Update Slider & Target Lencana
+    function updateTargetBadge() {
+      document.getElementById('badge-target').innerText = `Target: ${calcTarget} Pcs`;
+      document.getElementById('target-count').innerText = `${calcTarget} Kali Transaksi`;
+    }
+
+    // Fungsi Render Daftar Produk Bawaan
+    function renderCuratedProducts() {
+      const container = document.getElementById('curated-list');
+      container.innerHTML = '';
+
+      HIGH_COMMISSION_PRODUCTS.forEach(prod => {
+        const potentialProfit = prod.commissionValue * calcTarget;
+        
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 border border-slate-850 rounded-2xl p-4 space-y-3";
+        card.innerHTML = `
+          <div class="flex gap-3">
+            <!-- Video Preview Box -->
+            <div class="w-20 h-32 bg-slate-950 rounded-xl overflow-hidden flex-shrink-0 relative border border-slate-800">
+              <video src="${prod.videoUrl}" class="w-full h-full object-cover" preload="metadata" controls playsinline></video>
+            </div>
+
+            <!-- Detail Deskripsi -->
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="bg-emerald-950 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded border border-emerald-500/20">
+                    KOMISI ${prod.commissionRate}
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">${prod.sales}</span>
+                </div>
+                <h4 class="text-sm font-extrabold text-slate-100 mt-1.5 leading-tight">${prod.title}</h4>
+                <p class="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                  ${prod.description}
+                </p>
+              </div>
+
+              <!-- Laba Bersih Info -->
+              <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-850 flex justify-between items-center text-xs mt-1">
+                <span class="text-slate-400 text-[10px]">Laba per ${calcTarget} sales:</span>
+                <span class="font-extrabold text-yellow-400">Rp ${potentialProfit.toLocaleString('id-ID')}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aksi Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-850">
+            <a href="${prod.videoUrl}" download target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-[11px] py-2 rounded-xl text-center flex items-center justify-center space-x-1 border border-slate-700">
+              📥 Unduh Video
+            </a>
+            <button onclick="importCuratedPreset('${prod.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-[11px] py-2 rounded-xl">
+              🚀 Ambil & Atur Post
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Fungsi Render Daftar Kampanye Aktif
+    function renderCampaigns() {
+      const container = document.getElementById('antrean-container');
+      container.innerHTML = '';
+
+      if (campaigns.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 bg-slate-900/50 rounded-2xl border border-dashed border-slate-800 px-4">
+            <span class="text-2xl block mb-2">💸</span>
+            <p class="text-xs text-slate-400">Belum ada antrean postingan.</p>
+            <button onclick="switchTab('komisi')" class="mt-3 bg-emerald-600 text-white text-xs px-5 py-2.5 rounded-xl font-bold">
+              Riset Produk Komisi Tebal
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      campaigns.forEach(camp => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 border border-slate-850 p-4 rounded-xl space-y-3";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="bg-indigo-950/60 text-indigo-400 text-[9px] px-2 py-0.5 rounded-full border border-indigo-900 font-bold mr-1.5">
+                ${camp.category}
+              </span>
+              ${camp.commissionInfo ? `
+                <span class="bg-emerald-950/60 text-emerald-400 text-[9px] px-2 py-0.5 rounded-full border border-emerald-900 font-bold">
+                  Rate: ${camp.commissionInfo}
+                </span>
+              ` : ''}
+              <h4 class="text-sm font-extrabold text-slate-100 mt-1.5">${camp.productName}</h4>
+            </div>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${camp.status === 'Antrean' ? 'bg-amber-950 text-amber-400' : 'bg-slate-950 text-slate-500'}">
+              ${camp.status}
+            </span>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-850 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 truncate max-w-[200px]">
+                🎬 Video Link: ${camp.videoFile}
+              </span>
+              <a href="${camp.videoFile}" target="_blank" class="text-[10px] text-blue-400 hover:underline font-bold">Tonton/Unduh</a>
+            </div>
+            <p class="text-xs text-slate-300 italic leading-relaxed border-t border-slate-900 pt-2 line-clamp-3">
+              "${camp.caption}"
+            </p>
+          </div>
+
+          <!-- LAUNCHERS -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="launchApp('${camp.id}', 'shopee')" class="bg-orange-500 hover:bg-orange-600 text-slate-950 font-extrabold text-xs py-2 px-3 rounded-xl flex items-center justify-center space-x-1">
+              <span>🧡 Post ke Shopee</span>
+            </button>
+            <button onclick="launchApp('${camp.id}', 'tiktok')" class="bg-pink-600 hover:bg-pink-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl flex items-center justify-center space-x-1">
+              <span>🖤 Post ke TikTok</span>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center pt-1">
+            <button onclick="copyCaptionText('${camp.id}')" class="text-[10px] text-indigo-400 hover:underline font-bold">
+              Salin Teks Caption
+            </button>
+            <button onclick="deleteCampaign('${camp.id}')" class="text-[10px] text-rose-500/70 hover:text-rose-400">
+              Hapus Antrean
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Ambil Preset Terkurasi
+    function importCuratedPreset(id) {
+      const prod = HIGH_COMMISSION_PRODUCTS.find(p => p.id === id);
+      if (!prod) return;
+
+      const computedProfit = prod.commissionValue * calcTarget;
+      const defaultCaption = `🔥 PROMO GILA & VIRAL BANGET! 🔥\n\nCheckout sekarang juga ${prod.title}! Produk ini sudah terjual lebih dari ${prod.sales} di seluruh Indonesia karena kualitasnya juara banget ✨\n\nKenapa kamu harus punya ini?\n- Harga bersahabat cuma Rp ${prod.price.toLocaleString('id-ID')}!\n- Rekomendasi selebgram & tiktoker terkenal.\n\n👉 Klik link di bio / Shopee Video / Keranjang Kuning kamu sekarang sebelum harga naik besok!\n\n#affiliate #racunshopee #produkmini #promojakarta #barangunik #viralindonesia`;
+
+      const newCamp = {
+        id: "camp-" + Date.now(),
+        productName: prod.title,
+        videoFile: prod.videoUrl,
+        shopeeAffLink: prod.shopeeLink,
+        tiktokAffLink: prod.tiktokLink,
+        caption: defaultCaption,
+        category: prod.category,
+        commissionInfo: `${prod.commissionRate} (Rp ${prod.commissionValue.toLocaleString('id-ID')}/item)`,
+        status: "Antrean"
+      };
+
+      campaigns.unshift(newCamp);
+      saveCampaignData();
+      showToast(`Berhasil diimpor! Estimasi laba: Rp ${computedProfit.toLocaleString('id-ID')}`, 'success');
+      switchTab('antrean');
+    }
+
+    // Riset Online Dengan Gemini AI
+    async function searchHighCommissionWithAI() {
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) {
+        showToast('Tulis kategori produk terlebih dahulu!', 'error');
+        return;
+      }
+      if (!geminiApiKey) {
+        showToast('Isi Kunci API di tab Kunci AI!', 'error');
+        return;
+      }
+
+      const searchBtn = document.getElementById('search-btn');
+      searchBtn.disabled = true;
+      searchBtn.innerText = "Menganalisis...";
+      document.getElementById('ai-result-box').classList.add('hidden');
+
+      const systemPrompt = "Anda adalah analis data e-commerce Indonesia yang mendeteksi produk dengan persentase komisi affiliate terbesar (10%-20%) dan volume penjualan tertinggi. Berikan analisis akurat dalam format JSON.";
+      const userPrompt = `Analisis kategori produk: "${query}". Berikan 1 rekomendasi produk spesifik yang memiliki tingkat penjualan luar biasa tinggi (best seller) dan rate komisi affiliate tertinggi (minimal 10%-20%). 
+      Berikan output hanya berupa valid JSON terstruktur seperti berikut (jangan berikan teks pengantar apa pun):
+      {
+        "productName": "Nama Produk Spesifik Best Seller",
+        "estimatedPrice": "Rp 99.000",
+        "marketSales": "50.000+ unit terjual",
+        "commissionRate": "15%",
+        "commissionValue": "Rp 14.850",
+        "viralReasons": ["alasan viral 1", "alasan viral 2"],
+        "captionHook": "Teks kalimat hook 3 detik pertama video yang paling memicu klik pembelian",
+        "shopeeSearchLink": "Link pencarian produk di shopee",
+        "tiktokSearchLink": "Link pencarian produk di tiktok"
+      }`;
+
+      const makeApiCall = async () => {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
+        const payload = {
+          contents: [{ parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        };
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("API Error");
+        return await response.json();
+      };
+
+      // Exponential Backoff Retry (Up to 5 retries)
+      let retries = 5;
+      let delay = 1000;
+      let success = false;
+      let responseData = null;
+
+      while (retries > 0 && !success) {
+        try {
+          const jsonResult = await makeApiCall();
+          const rawText = jsonResult.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+          responseData = JSON.parse(rawText);
+          success = true;
+        } catch (error) {
+          retries--;
+          if (retries === 0) {
+            searchBtn.disabled = false;
+            searchBtn.innerText = "Deteksi";
+            showToast('Koneksi AI gagal. Periksa koneksi atau kunci API Anda!', 'error');
+            return;
+          }
+          await new Promise(res => setTimeout(res, delay));
+          delay *= 2;
+        }
+      }
+
+      if (success && responseData) {
+        searchResultsData = responseData;
+        updateAISearchResultUI();
+        document.getElementById('ai-result-box').classList.remove('hidden');
+        showToast('Produk komisi gajah berhasil dideteksi!', 'success');
+      }
+
+      searchBtn.disabled = false;
+      searchBtn.innerText = "Deteksi";
+    }
+
+    // Update UI Hasil AI Search
+    function updateAISearchResultUI() {
+      const data = searchResultsData;
+      document.getElementById('ai-badge-rate').innerText = `KOMISI ${data.commissionRate}`;
+      document.getElementById('ai-product-name').innerText = data.productName;
+      document.getElementById('ai-comm-val').innerText = data.commissionValue;
+      document.getElementById('ai-target-label').innerText = `Potensi ${calcTarget} Sales`;
+
+      const singleVal = parseInt(data.commissionValue.replace(/[^0-9]/g, '')) || 0;
+      document.getElementById('ai-comm-total').innerText = "Rp " + (singleVal * calcTarget).toLocaleString('id-ID');
+
+      const reasonsContainer = document.getElementById('ai-viral-reasons');
+      reasonsContainer.innerHTML = '';
+      data.viralReasons.forEach(r => {
+        const li = document.createElement('li');
+        li.innerText = r;
+        reasonsContainer.appendChild(li);
+      });
+    }
+
+    // Impor hasil Riset AI ke kampanye
+    function importAISearchResult() {
+      if (!searchResultsData) return;
+      const data = searchResultsData;
+
+      const defaultCaption = `🚨 JANGAN SAMPAI NYESEL GAK BELI INI! 🚨\n\n${data.captionHook} ✨\n\nProduk: ${data.productName}\nSudah laku lebih dari ${data.marketSales}!\n\nHarga promo diskon cuma ${data.estimatedPrice}!\n\n👉 Klik link di bio / keranjang kuning / Shopee Video kamu sekarang untuk checkout produk originalnya!\n\n#affiliatemarketing #racunshopee #tiktokshop #komisitinggi`;
+
+      const newCamp = {
+        id: "camp-" + Date.now(),
+        productName: data.productName,
+        videoFile: "https://videos.pexels.com/video-files/4252325/4252325-uhd_1440_2732_25fps.mp4",
+        shopeeAffLink: data.shopeeSearchLink,
+        tiktokAffLink: data.tiktokSearchLink,
+        caption: defaultCaption,
+        category: "Riset Komisi AI",
+        commissionInfo: `${data.commissionRate} (${data.commissionValue}/item)`,
+        status: "Antrean"
+      };
+
+      campaigns.unshift(newCamp);
+      saveCampaignData();
+      showToast('Produk rekomendasi AI sukses diimpor!', 'success');
+      switchTab('antrean');
+    }
+
+    // Submit Manual Form
+    function handleManualSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('m-name').value;
+      const video = document.getElementById('m-video').value;
+      const category = document.getElementById('m-category').value;
+      const shopee = document.getElementById('m-shopee').value;
+      const tiktok = document.getElementById('m-tiktok').value;
+      let caption = document.getElementById('m-caption').value;
+
+      if (!caption) {
+        caption = `Produk Baru: ${name}. Dapatkan sekarang lewat tautan belanja resmi kami! Jangan sampai kehabisan promonya.`;
+      }
+
+      const newCamp = {
+        id: "camp-" + Date.now(),
+        productName: name,
+        videoFile: video || "https://videos.pexels.com/video-files/4252325/4252325-uhd_1440_2732_25fps.mp4",
+        shopeeAffLink: shopee,
+        tiktokAffLink: tiktok,
+        caption: caption,
+        category: category,
+        status: "Antrean"
+      };
+
+      campaigns.unshift(newCamp);
+      saveCampaignData();
+      showToast('Kampanye manual berhasil disimpan!', 'success');
+      
+      // Reset Form
+      document.getElementById('manual-form').reset();
+      switchTab('antrean');
+    }
+
+    // Trigger Clipboard & Salin Teks
+    function triggerClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        success = false;
+      }
+      document.body.removeChild(textArea);
+      return success;
+    }
+
+    // Salin Teks Saja
+    function copyCaptionText(id) {
+      const camp = campaigns.find(c => c.id === id);
+      if (camp) {
+        triggerClipboard(camp.caption);
+        showToast('Caption promosi disalin ke HP!', 'success');
+      }
+    }
+
+    // Luncurkan Aplikasi Seluler (Deep Link)
+    function launchApp(id, platform) {
+      const camp = campaigns.find(c => c.id === id);
+      if (!camp) return;
+
+      triggerClipboard(camp.caption);
+
+      showToast('Caption disalin! Membuka aplikasi...', 'success');
+
+      setTimeout(() => {
+        if (platform === 'tiktok') {
+          // Buka Kamera/Upload TikTok langsung
+          window.location.href = "snssdk1180://camera";
+          setTimeout(() => {
+            window.open("https://www.tiktok.com/creator-center/upload", "_blank");
+          }, 1500);
+        } else {
+          // Buka Shopee App
+          window.location.href = "shopeeid://";
+          setTimeout(() => {
+            window.open("https://creator.shopee.co.id/web/upload", "_blank");
+          }, 1500);
+        }
+
+        // Ganti Status menjadi diposting
+        camp.status = "Telah Diposting";
+        saveCampaignData();
+      }, 800);
+    }
+
+    // Hapus Kampanye
+    function deleteCampaign(id) {
+      campaigns = campaigns.filter(c => c.id !== id);
+      saveCampaignData();
+      showToast('Konten dihapus.', 'info');
+    }
+
+    // Simpan Ke LocalStorage
+    function saveCampaignData() {
+      localStorage.setItem('affili_camp_data', JSON.stringify(campaigns));
+      renderCampaigns();
+    }
+  </script>
+</body>
+</html>
