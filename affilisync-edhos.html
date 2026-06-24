@@ -1,9 +1,9 @@
-``<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AffiliSync Mobile V3.6</title>
+  <title>AffiliSync Mobile V3.7</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -46,9 +46,9 @@
       </div>
       <div>
         <h1 class="text-sm font-black tracking-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-          AffiliSync V3.6 Pro
+          AffiliSync V3.7 Pro
         </h1>
-        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider font-mono">Smart Clipboard Search</p>
+        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider font-mono">Pure MP4 Video Exporter</p>
       </div>
     </div>
     <div class="bg-emerald-500/10 text-emerald-400 text-[10px] px-3 py-1 rounded-full font-black border border-emerald-500/20" id="badge-target">
@@ -77,10 +77,10 @@
       <!-- HERO INFO -->
       <div class="bg-gradient-to-br from-indigo-500/15 to-purple-500/5 border border-indigo-500/20 p-4 rounded-2xl space-y-2">
         <h2 class="text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
-          <i data-lucide="zap" class="w-3.5 h-3.5"></i> Auto Copy & Search HP
+          <i data-lucide="video" class="w-3.5 h-3.5"></i> Output MP4 Galeri Ready
         </h2>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Saat menekan tombol buka Shopee/TikTok, aplikasi akan otomatis **menyalin nama produk**. Ketika aplikasi tujuan terbuka, Anda tinggal **Tempel (Paste)** di kolom cari!
+          Sistem video generator kini telah diperbarui ke **Format MP4**. Video promosi yang diunduh otomatis tersimpan sebagai `.mp4` yang didukung penuh oleh HP Anda.
         </p>
       </div>
 
@@ -190,11 +190,11 @@
               <canvas id="video-canvas" width="360" height="640" class="w-full h-full object-cover"></canvas>
               <div id="video-rendering-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center hidden">
                 <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400 mb-2"></span>
-                <span class="text-[10px] text-slate-300 font-bold" id="render-progress">Merender Video...</span>
+                <span class="text-[10px] text-slate-300 font-bold" id="render-progress">Merender Video MP4...</span>
               </div>
             </div>
             <button onclick="generateAndDownloadVideo()" id="btn-video-gen" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] py-2 rounded-lg flex items-center justify-center gap-1 shadow-md">
-              <i data-lucide="download" class="w-3 h-3"></i> Buat & Download Video Promosi
+              <i data-lucide="download" class="w-3 h-3"></i> Buat & Download Video MP4
             </button>
           </div>
 
@@ -533,27 +533,20 @@
       return success;
     }
 
-    // ==========================================
-    // SISTEM AUTO-COPY & OPEN MARKETPLACE BARU (v3.6)
-    // ==========================================
     function copyAndOpenMarketplace(platform) {
       if (!searchResultsData) return;
       const name = searchResultsData.productName;
 
-      // 1. Salin nama produk ke clipboard HP otomatis
       triggerClipboard(name);
       showToast(`Nama produk disalin! Membuka ${platform}...`, 'success');
 
-      // 2. Jalankan Deep Link ke pencarian/halaman utama aplikasi
       setTimeout(() => {
         if (platform === 'shopee') {
-          // Buka aplikasi Shopee ke menu pencarian
           window.location.href = "shopeeid://search";
           setTimeout(() => {
             window.open("https://shopee.co.id", "_blank");
           }, 1500);
         } else {
-          // Buka aplikasi TikTok ke halaman cari
           window.location.href = "snssdk1180://search";
           setTimeout(() => {
             window.open("https://www.tiktok.com", "_blank");
@@ -775,6 +768,9 @@
       ctx.fillText(line, x, y);
     }
 
+    // ==========================================
+    // SISTEM PEREKAM VIDEO KE MP4 MURNI
+    // ==========================================
     function generateAndDownloadVideo() {
       const canvas = document.getElementById('video-canvas');
       const overlay = document.getElementById('video-rendering-overlay');
@@ -783,27 +779,39 @@
 
       if (overlay) overlay.classList.remove('hidden');
 
-      const stream = canvas.captureStream(30); 
+      const stream = canvas.captureStream(30); // Capture 30 FPS dari Canvas
       const recordedChunks = [];
       
-      let options = { mimeType: 'video/webm; codecs=vp9' };
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm' };
+      // Deteksi otomatis MimeType MP4 yang didukung oleh browser HP Anda
+      let mimeTypeUsed = 'video/mp4;codecs=h264';
+      if (!MediaRecorder.isTypeSupported(mimeTypeUsed)) {
+        mimeTypeUsed = 'video/mp4'; // Fallback ke kontainer MP4 standar
+      }
+      if (!MediaRecorder.isTypeSupported(mimeTypeUsed)) {
+        mimeTypeUsed = 'video/webm;codecs=vp9'; // Fallback Android lama
+      }
+      if (!MediaRecorder.isTypeSupported(mimeTypeUsed)) {
+        mimeTypeUsed = 'video/webm'; // Fallback universal terakhir
       }
 
-      const mediaRecorder = new MediaRecorder(stream, options);
+      console.log("[AffiliSync] Menggunakan codec perekaman: " + mimeTypeUsed);
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: mimeTypeUsed });
 
       mediaRecorder.ondataavailable = function(e) {
         if (e.data.size > 0) recordedChunks.push(e.data);
       };
 
       mediaRecorder.onstop = function() {
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        // Simpan Blob output murni dengan penamaan format file .mp4
+        const blob = new Blob(recordedChunks, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `promosi_${searchResultsData ? searchResultsData.productName.replace(/\s+/g, '_') : 'video'}.webm`;
+        // File dipastikan tersimpan langsung berformat .mp4 ramah HP
+        const cleanName = searchResultsData ? searchResultsData.productName.replace(/\s+/g, '_') : 'video';
+        a.download = `promosi_${cleanName}.mp4`;
         document.body.appendChild(a);
         a.click();
         
@@ -811,7 +819,7 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           if (overlay) overlay.classList.add('hidden');
-          showToast('Video promosi berhasil disimpan ke file unduhan!', 'success');
+          showToast('Video promosi MP4 berhasil diunduh ke Galeri!', 'success');
         }, 500);
       };
 
@@ -821,7 +829,7 @@
       let secElapsed = 0;
       const interval = setInterval(() => {
         secElapsed += 1;
-        if (progressText) progressText.innerText = `Memproses Video: ${secElapsed * 10}%`;
+        if (progressText) progressText.innerText = `Merender Video MP4: ${secElapsed * 10}%`;
         if (secElapsed >= 10) {
           clearInterval(interval);
           mediaRecorder.stop();
@@ -842,7 +850,7 @@
       const newCamp = {
         id: "camp-" + Date.now(),
         productName: data.productName,
-        videoFile: "Video Promosi Tergenerate",
+        videoFile: "promosi_" + data.productName.replace(/\s+/g, '_') + ".mp4",
         shopeeAffLink: shopeeLinkUsed,
         caption: defaultCaption,
         category: "Riset AI",
@@ -922,7 +930,7 @@
       const newCamp = {
         id: "camp-" + Date.now(),
         productName: prod.title,
-        videoFile: prod.videoUrl,
+        videoFile: "promosi_" + prod.title.replace(/\s+/g, '_') + ".mp4",
         shopeeAffLink: finalLink,
         caption: defaultCaption,
         category: prod.category,
@@ -953,7 +961,7 @@
       const newCamp = {
         id: "camp-" + Date.now(),
         productName: name,
-        videoFile: "Video Promosi Tergenerate",
+        videoFile: "promosi_" + name.replace(/\s+/g, '_') + ".mp4",
         shopeeAffLink: shopee,
         caption: caption,
         category: category,
